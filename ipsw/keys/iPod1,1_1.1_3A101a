@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FirmwareDownloadURL</key>
+	<string>http://appldnld.apple.com.edgesuite.net/content.info.apple.com/iPod/SBML/osx/bundles/061-3882.20070910.N8uyT/iPod1,1_1.1_3A101a_Restore.ipsw</string>
+	<key>FirmwareKeysURL</key>
+	<string>https://api.ipsw.me/v4/keys/ipsw/iPod1,1/3A101a</string>
+	<key>KernelCacheIV</key>
+	<string></string>
+	<key>KernelCacheKey</key>
+	<string></string>
+	<key>RootFSKey</key>
+	<string>6f021b478cc21ff77f775850c0efc2e66fd015f6a6894be079ee1351dce9af069f915f3d</string>
+</dict>
+</plist>

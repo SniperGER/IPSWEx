@@ -1,0 +1,114 @@
+#!/bin/bash
+
+#
+#  download_keys
+#  Downloads firmware decryption keys for a given BuildManifest.plist
+#
+#  © 2021-2022 Team FESTIVAL
+#
+
+source $(dirname $0)/_common
+
+if [ -z $1 ]; then
+	echo "Usage: $(basename $0) <FirmwareName>"
+	echo ""
+	echo "Downloads firmware decryption keys for a given BuildManifest.plist."
+	echo ""
+	echo "  FirmwareName:  The name of a firmware which contains a BuildManifest.plist."
+	echo ""
+	exit 1
+fi
+
+if [[ -f "${FIRMWARE_OUT}/BuildManifest.plist" ]]; then
+    # __error "Specified firmware (${FIRMWARE_OUT}) does not contain a BuildManifest.plist."
+    # exit 1
+	PRODUCT_TYPE=$($MANIFESTO ${FIRMWARE_OUT}/BuildManifest.plist --product)
+	PRODUCT_BUILD=$($MANIFESTO ${FIRMWARE_OUT}/BuildManifest.plist --build)
+	PRODUCT_VERSION=$($MANIFESTO ${FIRMWARE_OUT}/BuildManifest.plist --version)
+	BUILD_TRAIN=$($MANIFESTO ${FIRMWARE_OUT}/BuildManifest.plist --train)
+elif [[ -f "${FIRMWARE_OUT}/Restore.plist" ]]; then
+	PRODUCT_TYPE=$($MANIFESTO ${FIRMWARE_OUT}/Restore.plist --product -l)
+	PRODUCT_BUILD=$($MANIFESTO ${FIRMWARE_OUT}/Restore.plist --build -l)
+	PRODUCT_VERSION=$($MANIFESTO ${FIRMWARE_OUT}/Restore.plist --version -l)
+	BUILD_TRAIN=""
+else
+	__error "Specified firmware (${FIRMWARE_OUT}) does not contain a BuildManifest.plist/Restore.plist."
+    exit 1
+fi
+
+__debug "PRODUCT_TYPE = $PRODUCT_TYPE"
+__debug "PRODUCT_BUILD = $PRODUCT_BUILD"
+__debug "PRODUCT_VERSION = $PRODUCT_VERSION"
+__debug "BUILD_TRAIN = $BUILD_TRAIN"
+
+if [[ ! "$(sed 's/\([^A-Z]*\).*/\1/' <<< $PRODUCT_BUILD)" -ge "14" ]] && [[ -f $KEYS_PATH/$FIRMWARE_BASE ]] && [[ -n $(/usr/libexec/PlistBuddy "${KEYS_PATH}/${FIRMWARE_BASE}" -c "Print :RootFSKey") ]]; then
+	__info "Looks like keys for $FIRMWARE_BASE have been downloaded already, skipping."
+	exit 0
+fi
+
+mkdir -p $KEYS_PATH
+
+if [[ "$(sed 's/\([^A-Z]*\).*/\1/' <<< $PRODUCT_BUILD)" -ge "14" ]]; then
+	__info "$FIRMWARE_BASE does not require decryption keys."
+	exit 0
+	cat > $KEYS_PATH/$FIRMWARE_BASE <<END
+{
+	"FirmwareDownloadURL": "${FIRMWARE_URL}",
+	"FirmwareKeysURL": "https://api.ipsw.me/v4/keys/ipsw/${PRODUCT_TYPE}/${PRODUCT_BUILD}",
+	"RootFSKey": "",
+	"KernelCacheKey": "",
+	"KernelCacheIV": ""
+}
+END
+	plutil -convert xml1 $KEYS_PATH/$FIRMWARE_BASE
+	exit 0
+fi
+
+IPSW_INFO=$(curl -s "https://api.ipsw.me/v4/ipsw/${PRODUCT_TYPE}/${PRODUCT_BUILD}")
+
+if [[ ${#IPSW_INFO} -eq 0 ]]; then
+	__error "Could not find IPSW for $FIRMWARE_BASE. Aborting."
+	exit 1
+fi
+
+FIRMWARE_URL=$(echo ${IPSW_INFO} | ruby -rjson -e 'data = JSON.parse(STDIN.read); puts data["url"]')
+__debug "FIRMWARE_URL = $FIRMWARE_URL"
+
+KEY_INFO=$(curl -s "https://api.ipsw.me/v4/keys/ipsw/${PRODUCT_TYPE}/${PRODUCT_BUILD}")
+
+if [[ ${#KEY_INFO} -eq 0 ]] && [[ "$(sed 's/\([^A-Z]*\).*/\1/' <<< $PRODUCT_BUILD)" -lt "14" ]]; then
+	__error "Could not find firmware keys for $FIRMWARE_BASE. Aborting."
+	exit 1
+fi
+
+ROOTFS_KEY=$(echo ${KEY_INFO} | ruby -rjson -e 'data = JSON.parse(STDIN.read); data["keys"].each do |image|; if image["image"] == "RootFileSystem"; puts image["key"]; exit(0); end; end')
+KERNELCACHE_KEY=$(echo ${KEY_INFO} | ruby -rjson -e 'data = JSON.parse(STDIN.read); data["keys"].each do |image|; if image["image"] == "Kernelcache"; puts image["key"]; exit(0); end; end')
+KERNELCACHE_IV=$(echo ${KEY_INFO} | ruby -rjson -e 'data = JSON.parse(STDIN.read); data["keys"].each do |image|; if image["image"] == "Kernelcache"; puts image["iv"]; exit(0); end; end')
+
+__debug "ROOTFS_KEY = $ROOTFS_KEY"
+__debug "KERNELCACHE_KEY = $KERNELCACHE_KEY"
+__debug "KERNELCACHE_IV = $KERNELCACHE_IV"
+
+if [[ -z $ROOTFS_KEY ]] && [[ ! "$(sed 's/\([^A-Z]*\).*/\1/' <<< $PRODUCT_BUILD)" -ge "14" ]]; then
+	__info "This build requires a RootFS decryption key, but https://api.ipsw.me did not provide it."
+
+	if [[ -n $BUILD_TRAIN ]]; then
+		__info "To continue, you need to get it yourself from https://www.theiphonewiki.com/wiki/${BUILD_TRAIN}_${PRODUCT_BUILD}_(${PRODUCT_TYPE})"
+	else
+		__info "To continue, you need to get it yourself from https://www.theiphonewiki.com/wiki/Firmwares"
+		__info "Hint: Look for ${PRODUCT_TYPE} ${PRODUCT_VERSION} (${PRODUCT_BUILD})"
+	fi
+
+	read -p "RootFS key: " ROOTFS_KEY
+fi
+
+cat > $KEYS_PATH/$FIRMWARE_BASE <<END
+{
+	"FirmwareDownloadURL": "${FIRMWARE_URL}",
+	"FirmwareKeysURL": "https://api.ipsw.me/v4/keys/ipsw/${PRODUCT_TYPE}/${PRODUCT_BUILD}",
+	"RootFSKey": "$ROOTFS_KEY",
+	"KernelCacheKey": "$KERNELCACHE_KEY",
+	"KernelCacheIV": "$KERNELCACHE_IV"
+}
+END
+plutil -convert xml1 $KEYS_PATH/$FIRMWARE_BASE

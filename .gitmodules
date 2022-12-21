@@ -1,0 +1,6 @@
+[submodule "tools/vfdecrypt"]
+	path = tools/vfdecrypt
+	url = https://github.com/Tomer1510/VFDecrypt
+[submodule "CAMLViewer/FLEX"]
+	path = CAMLViewer/FLEX
+	url = https://github.com/FLEXTool/FLEX

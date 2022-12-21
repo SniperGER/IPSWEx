@@ -1,0 +1,21 @@
+#!/bin/bash
+
+__error() {
+	echo -e "\033[31m[ERROR]\033[0m $1"
+}
+
+__warn() {
+	echo -e "\033[33m[WARN]\033[0m $1"
+}
+
+__info() {
+	if [[ $INFO -eq "1" ]]; then
+		echo -e "\033[34m[INFO]\033[0m $1"
+	fi
+}
+
+__debug() {
+	if [[ $DEBUG -eq "1" ]]; then
+		echo -e "\033[95m[DEBUG]\033[0m $1"
+	fi
+}

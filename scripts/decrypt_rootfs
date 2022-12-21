@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#
+#  decrypt_rootfs
+#  Decrypts the RootFS .dmg from a given IPSW
+#
+#  © 2021-2022 Team FESTIVAL
+#
+
+source $(dirname $0)/_common
+
+if [ -z $1 ]; then
+	echo "Usage: $(basename $0) <FirmwarePath>"
+	echo ""
+	echo "Decrypts the RootFS .dmg from a given IPSW."
+	echo ""
+	echo "  FirmwarePath:  Path to an IPSW of which to decrypt the RootFS .dmg from (if needed)."
+	echo ""
+	exit 1
+fi
+
+if [[ ! -d "${FIRMWARE_OUT}" ]]; then
+    __error "Could not find extracted firmware contents."
+    exit 1
+fi
+
+# if [[ ! -f "${FIRMWARE_OUT}/BuildManifest.plist" ]]; then
+#     __error "Specified firmware (${FIRMWARE_OUT}) does not contain a BuildManifest.plist."
+#     exit 1
+# fi
+if [[ -f "${FIRMWARE_OUT}/BuildManifest.plist" ]]; then
+    ROOTFS=$($MANIFESTO ${FIRMWARE_OUT}/BuildManifest.plist --rootfs)
+elif [[ -f "${FIRMWARE_OUT}/Restore.plist" ]]; then
+	ROOTFS=$($MANIFESTO ${FIRMWARE_OUT}/Restore.plist --rootfs -l)
+else
+	__error "Specified firmware (${FIRMWARE_OUT}) does not contain a BuildManifest.plist/Restore.plist."
+    exit 1
+fi
+
+if [[ ! -f $KEYS_PATH/$FIRMWARE_BASE ]] || [[ -z $(/usr/libexec/PlistBuddy "${KEYS_PATH}/${FIRMWARE_BASE}" -c "Print :RootFSKey") ]]; then
+	__info "No RootFS decryption key given. Assuming this build doesn't need to be decrypted."
+	exit 0
+fi
+
+# ROOTFS=$($MANIFESTO ${FIRMWARE_OUT}/BuildManifest.plist --rootfs)
+ROOTFS_KEY=$(/usr/libexec/PlistBuddy "${KEYS_PATH}/${FIRMWARE_BASE}" -c "Print :RootFSKey")
+
+__debug "ROOTFS = $ROOTFS"
+__debug "ROOTFS_KEY = $ROOTFS_KEY"
+
+"$VFDECRYPT" -k"$ROOTFS_KEY" -i"$FIRMWARE_OUT/$ROOTFS" -o"$FIRMWARE_OUT/_$ROOTFS" > /dev/null 2>&1
+mv "$FIRMWARE_OUT/_$ROOTFS" "$FIRMWARE_OUT/$ROOTFS"
+
+if [[ $OSTYPE == linux* ]]; then
+	PARTITION=$(dmg2img -l "$FIRMWARE_OUT/$ROOTFS" | grep "disk image" | awk '{print $2}' | head -c 1)
+
+	__info "Extracting partition $PARTITION in dmg file $ROOTFS to $(basename $ROOTFS .dmg).img ..."
+	dmg2img -p "$PARTITION" -i "$FIRMWARE_OUT/$ROOTFS" -o "$FIRMWARE_OUT/$(basename $ROOTFS .dmg).img" > /dev/null 2>&1
+	rm "$FIRMWARE_OUT/$ROOTFS"
+fi

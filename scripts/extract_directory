@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#
+#  extract_directory
+#  Copies a given directory to a target directory from a mounted IPSW
+#
+#  © 2021-2022 Team FESTIVAL
+#
+
+source $(dirname $0)/_common
+
+if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]; then
+	echo "Usage: $(basename $0) <FirmwarePath> <SourceDirectory> <TargetDirectory>"
+	echo ""
+	echo "Copies a given directory to a target directory from a mounted IPSW."
+	echo ""
+	echo "  FirmwarePath:  Path to a currently mounted IPSW."
+	echo "  SourceDirectory:  A directory inside the IPSW to be copied."
+	echo "  TargetDirectory:  The location to copy the source directory into."
+	echo ""
+	exit 1
+fi
+
+ROOTFS_MOUNT=$(realpath "$MOUNT_POINT/$FIRMWARE_BASE")
+if [[ ! -d $ROOTFS_MOUNT ]] || [[ ! -n $(find $ROOTFS_MOUNT -type d -name "System" -maxdepth 1) ]]; then
+    __error "RootFS is not mounted. Aborting."
+    exit 1
+fi
+
+SRC=$ROOTFS_MOUNT/$2
+DEST=$3
+
+__debug "SRC = $SRC"
+__debug "DEST = $DEST"
+
+mkdir -p $DEST
+cp -R "$SRC" "$DEST"

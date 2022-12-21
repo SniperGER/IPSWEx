@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#
+#  unmount_rootfs
+#  Unmounts the RootFS of a given IPSW
+#
+#  © 2021-2022 Team FESTIVAL
+#
+
+source $(dirname $0)/_common
+
+if [[ "$EUID" -ne 0 ]]; then
+	echo "This script needs to be run as root"
+	exit 1
+fi
+
+if [ -z $1 ]; then
+	echo "Usage: $(basename $0) <FirmwarePath>"
+	echo ""
+	echo "Unmounts the RootFS of a given IPSW."
+	echo ""
+	echo "  FirmwarePath:  Path to an IPSW of which the RootFS is currently mounted."
+	echo ""
+	exit 1
+fi
+
+if [[ ! -d "${FIRMWARE_OUT}" ]]; then
+    __error "Could not find extracted firmware contents."
+    exit 1
+fi
+
+# if [[ ! -f "${FIRMWARE_OUT}/BuildManifest.plist" ]]; then
+#     __error "Specified firmware (${FIRMWARE_OUT}) does not contain a BuildManifest.plist."
+#     exit 1
+# fi
+
+ROOTFS_MOUNT=$MOUNT_POINT/$FIRMWARE_BASE
+__debug "ROOTFS_MOUNT = $ROOTFS_MOUNT"
+
+if [[ ! -d $ROOTFS_MOUNT ]] || [[ ! -n $(find $ROOTFS_MOUNT -type d -name "System" -maxdepth 1) ]]; then
+    __error "RootFS is not mounted. Aborting."
+    exit 1
+fi
+
+if [[ $OSTYPE == darwin* ]]; then
+	# echo $(sed 's/\(\/dev\/disk[0-9]\).*/\1/' <<< "/dev/disk3 Apple_partition_scheme")
+    for d in $(hdiutil info | grep -B 15 "$ROOTFS_MOUNT" | grep '^/dev/disk[0-9]\+'$'\t' | cut -d $'\t' -f 1 | tac); do
+        hdiutil detach "$d" > /dev/null 2>&1
+    done
+elif [[ $OSTYPE == linux* ]]; then
+    umount "$mount_point" > /dev/null 2>&1
+fi
+
+rmdir "$ROOTFS_MOUNT"

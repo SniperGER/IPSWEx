@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FirmwareDownloadURL</key>
+	<string>http://appldnld.apple.com/iOS9.3.5/031-73563-20160825-6A322150-6711-11E6-93CD-313834D2D062/iPhone8,4_9.3.5_13G36_Restore.ipsw</string>
+	<key>FirmwareKeysURL</key>
+	<string>https://api.ipsw.me/v4/keys/ipsw/iPhone8,4/13G36</string>
+	<key>KernelCacheIV</key>
+	<string></string>
+	<key>KernelCacheKey</key>
+	<string></string>
+	<key>RootFSKey</key>
+	<string>ddddf1837e5edc468a8202a0412fdf5e39d4a696cebbbf08e305f79fa0d3d8b27f3aa40b</string>
+</dict>
+</plist>

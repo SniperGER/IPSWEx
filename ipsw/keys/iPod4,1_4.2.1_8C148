@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FirmwareDownloadURL</key>
+	<string>http://appldnld.apple.com/iPhone4/061-9859.20101122.$erft/iPod4,1_4.2.1_8C148_Restore.ipsw</string>
+	<key>FirmwareKeysURL</key>
+	<string>https://api.ipsw.me/v4/keys/ipsw/iPod4,1/8C148</string>
+	<key>KernelCacheIV</key>
+	<string>a6833ce70afdbf37162dca25de6c0c99</string>
+	<key>KernelCacheKey</key>
+	<string>44ba15a1ab554017c5a67826ddcdcaffb24f8e96edb3f2ecaf8f5416faba2cc3</string>
+	<key>RootFSKey</key>
+	<string>982437b30d334c744c94b9a73ab70e0fc6ed94c181b2a8b0fde6ee03f2546cc9b2c5b01c</string>
+</dict>
+</plist>

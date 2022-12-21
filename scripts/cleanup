@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+#  cleanup
+#  Deletes the extracted files from a given IPSW
+#
+#  © 2021-2022 Team FESTIVAL
+#
+
+source $(dirname $0)/_common
+
+rm -rf $FIRMWARE_OUT

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FirmwareDownloadURL</key>
+	<string>http://appldnld.apple.com/iOS5.1.1/041-4300.20120427.WvgGq/iPod3,1_5.1.1_9B206_Restore.ipsw</string>
+	<key>FirmwareKeysURL</key>
+	<string>https://api.ipsw.me/v4/keys/ipsw/iPod3,1/9B206</string>
+	<key>KernelCacheIV</key>
+	<string>5d618983129f3b121ad032dc0a170ea9</string>
+	<key>KernelCacheKey</key>
+	<string>835138e000a3d9425cc1d0d57cacd55ea6a7e46a42fac59dd55f98cb80240fe3</string>
+	<key>RootFSKey</key>
+	<string>33148831d924a6ea1e9f1051cb0abfb15dc481a91617f37d950612de185c5f182d963a15</string>
+</dict>
+</plist>

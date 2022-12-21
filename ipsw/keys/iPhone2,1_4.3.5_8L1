@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FirmwareDownloadURL</key>
+	<string>http://appldnld.apple.com/iPhone4/041-1965.20110721.gxUB5/iPhone2,1_4.3.5_8L1_Restore.ipsw</string>
+	<key>FirmwareKeysURL</key>
+	<string>https://api.ipsw.me/v4/keys/ipsw/iPhone2,1/8L1</string>
+	<key>KernelCacheIV</key>
+	<string>db5746b1411c34d78f1276e5416769c3</string>
+	<key>KernelCacheKey</key>
+	<string>d95751186440a71ad6d98ddc9f2c1f2d25ade877c4ac37d84b518e6abd6e6805</string>
+	<key>RootFSKey</key>
+	<string>8b04eb7e4c4c3bea36693fee2369d48c667083ae79ddea8c02f5ce9da30a74cb20707328</string>
+</dict>
+</plist>

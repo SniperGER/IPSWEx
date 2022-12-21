@@ -1,0 +1,83 @@
+#!/bin/bash
+
+#
+#  mount_rootfs
+#  Mounts a given IPSW on <ProjectDir>/ipsw/mnt/<IPSWName>/
+#
+#  © 2021-2022 Team FESTIVAL
+#
+
+source $(dirname $0)/_common
+
+if [[ "$EUID" -ne 0 ]]; then
+	echo "This script needs to be run as root"
+	exit 1
+fi
+
+if [ -z $1 ]; then
+	echo "Usage: $(basename $0) <FirmwarePath>"
+	echo ""
+	echo "Mounts a given IPSW on <ProjectDir>/ipsw/mnt/<IPSWName>/."
+	echo ""
+	echo "  FirmwarePath:  Path to an IPSW to mount the RootFS .dmg from."
+	echo ""
+	exit 1
+fi
+
+if [[ ! -d "${FIRMWARE_OUT}" ]]; then
+    __error "Could not find extracted firmware contents."
+    exit 1
+fi
+
+if [[ -f "${FIRMWARE_OUT}/BuildManifest.plist" ]]; then
+    ROOTFS=$($MANIFESTO ${FIRMWARE_OUT}/BuildManifest.plist --rootfs)
+elif [[ -f "${FIRMWARE_OUT}/Restore.plist" ]]; then
+	ROOTFS=$($MANIFESTO ${FIRMWARE_OUT}/Restore.plist --rootfs -l)
+else
+	__error "Specified firmware (${FIRMWARE_OUT}) does not contain a BuildManifest.plist/Restore.plist."
+    exit 1
+fi
+
+__debug "ROOTFS = $ROOTFS"
+
+if [[ $OSTYPE == darwin* ]]; then
+	IMAGE=$ROOTFS
+elif [[ $OSTYPE == linux* ]]; then
+	IMAGE=$(basename $ROOTFS .dmg).img
+fi
+
+if [[ ! -f $FIRMWARE_OUT/$IMAGE ]]; then
+	__error "Could not find RootFS image"
+	exit 1
+fi
+
+ROOTFS_MOUNT=$MOUNT_POINT/$FIRMWARE_BASE
+__debug "ROOTFS_MOUNT = $ROOTFS_MOUNT"
+
+if [[ -d $ROOTFS_MOUNT ]] && [[ -n $(find $ROOTFS_MOUNT -type d -name "System" -maxdepth 1) ]]; then
+    __error "RootFS already mounted. Aborting."
+    exit 1
+fi
+
+mkdir -p $ROOTFS_MOUNT
+
+EXT=${IMAGE#*.}
+
+if [[ "$EXT" == "dmg" ]]; then
+    if [[ $OSTYPE != darwin* ]]; then
+        __error "Apple Disk Image Format (.dmg) is only supported on macOS"
+        exit 1
+    fi
+
+    hdiutil attach -noverify -mountpoint "$ROOTFS_MOUNT" "$FIRMWARE_OUT/$IMAGE" > /dev/null 2>&1
+elif [[ "$ext" == "img" ]]; then
+    if [[ $OSTYPE == linux* ]]; then
+        modprobe hfsplus
+        mount -t hfsplus -o loop "$FIRMWARE_OUT/$IMAGE" "$ROOTFS_MOUNT" > /dev/null 2>&1
+    elif [[ $OSTYPE == darwin* ]]; then
+        hdiutil mount -mountpoint "$ROOTFS_MOUNT" "$FIRMWARE_OUT/$IMAGE" > /dev/null 2>&1
+    fi
+else
+    __error "Unknown image extension: $EXT"
+    exit 1
+fi

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#
+#  extract_build_manifest
+#  Extracts BuildManifest.plist from a given IPSW
+#
+#  © 2021-2022 Team FESTIVAL
+#
+
+source $(dirname $0)/_common
+
+if [ -z $1 ]; then
+	echo "Usage: $(basename $0) <FirmwarePath>"
+	echo ""
+	echo "Extracts BuildManifest.plist (or Restore.plist for old firmwares) from a given IPSW."
+	echo ""
+	echo "  FirmwarePath:  Path to an IPSW to extract BuildManifest.plist/Restore.plist from."
+	echo ""
+	exit 1
+fi
+
+if [[ ! -f "${FIRMWARE}" ]]; then
+    __error "Specified file does not exist."
+    exit 1
+fi
+
+if [[ -z $(grep '.ipsw$' <<< "${FIRMWARE}") ]]; then
+    __error "Specified file must be an .ipsw file."
+    exit 1
+fi
+
+mkdir -p $FIRMWARE_OUT
+# yes | unzip -qq -j "${FIRMWARE}" "BuildManifest.plist" -d "${FIRMWARE_OUT}" > /dev/null 2>&1
+unzip -l "${FIRMWARE}" | grep -q "BuildManifest.plist"
+if [ "$?" == "0" ]; then
+    yes | unzip -qq -j "${FIRMWARE}" "BuildManifest.plist" -d "${FIRMWARE_OUT}" > /dev/null 2>&1
+else
+	unzip -l "${FIRMWARE}" | grep -q "Restore.plist"
+	if [ "$?" == "0" ]; then
+		__info "Selected IPSW is legacy firmware (contains Restore.plist instead of BuildManifest.plist)."
+		yes | unzip -qq -j "${FIRMWARE}" "Restore.plist" -d "${FIRMWARE_OUT}" > /dev/null 2>&1
+	fi
+fi

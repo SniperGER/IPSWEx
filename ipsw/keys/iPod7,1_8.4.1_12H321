@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FirmwareDownloadURL</key>
+	<string>http://appldnld.apple.com/ios8.4.1/031-31024-20150812-751694AA-3C8F-11E5-B90B-9D1A3A53DB92/iPod7,1_8.4.1_12H321_Restore.ipsw</string>
+	<key>FirmwareKeysURL</key>
+	<string>https://api.ipsw.me/v4/keys/ipsw/iPod7,1/12H321</string>
+	<key>KernelCacheIV</key>
+	<string>98e517565260f82e396d5e1e1c937c17</string>
+	<key>KernelCacheKey</key>
+	<string>19782f26e724633aed12a282eea67c2ce25ce9b76b8ed7dbc5798e5495b58995</string>
+	<key>RootFSKey</key>
+	<string>b2150f8ba60a1b3078af3f1837736a6e0b9bcbcb4116f89e8f8801948cc2904a889be6fd</string>
+</dict>
+</plist>

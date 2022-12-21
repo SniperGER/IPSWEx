@@ -1,0 +1,69 @@
+#!/bin/bash
+
+set -e
+
+source .env
+source scripts/_log
+
+__debug "ROOT = $ROOT"
+__debug "KEYS_PATH = $KEYS_PATH"
+__debug "IPSW_PATH = $IPSW_PATH"
+__debug "MOUNT_POINT = $MOUNT_POINT"
+__debug "INFO = $INFO"
+__debug "DEBUG = $DEBUG"
+__debug "WAIT_AFTER_EXTRACT = $WAIT_AFTER_EXTRACT"
+
+if [ -z "$1" ]; then
+	echo "Usage: $(basename $0) <FirmwarePath>"
+	echo ""
+	echo "Extracts every wallpaper from a given IPSW."
+	echo ""
+	echo "  FirmwarePath:  Path to an IPSW to extract wallpapers from."
+	echo ""
+	exit 1
+fi
+
+FIRMWARE="$1"
+FIRMWARE_BASE=$(basename "$FIRMWARE" _Restore.ipsw)
+
+__debug "FIRMWARE = $FIRMWARE"
+__debug "FIRMWARE_BASE = $FIRMWARE_BASE"
+
+if [[ ! -f "${FIRMWARE}" ]]; then
+    __error "Specified file does not exist."
+    exit 1
+fi
+
+__info "Selected IPSW: $FIRMWARE_BASE"
+
+
+
+echo "* Extracting build manifest"
+./scripts/extract_build_manifest "$FIRMWARE"
+
+echo "* Downloading firmware keys"
+./scripts/download_keys "$FIRMWARE"
+
+echo "* Extracting RootFS"
+./scripts/unpack_rootfs "$FIRMWARE"
+
+echo "* Decrypting RootFS (if needed)"
+./scripts/decrypt_rootfs "$FIRMWARE"
+
+echo "* Mounting RootFS"
+sudo ./scripts/mount_rootfs "$FIRMWARE"
+
+echo "* Extracting wallpapers"
+./scripts/extract_directory "$FIRMWARE" "/Library/Wallpaper" $OUT
+
+if [[ $WAIT_AFTER_EXTRACT -eq "1" ]]; then
+	echo "* Waiting for user to continue..."
+	echo "Press RETURN to continue."
+	read
+fi
+
+echo "* Unounting RootFS"
+sudo ./scripts/unmount_rootfs "$FIRMWARE"
+
+echo "* Cleaning up"
+./scripts/cleanup "$FIRMWARE"

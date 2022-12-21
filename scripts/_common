@@ -1,0 +1,29 @@
+#!/bin/bash
+
+source $(dirname $0)/../.env
+source $(dirname $0)/_log
+
+MANIFESTO=$(dirname $0)/../tools/manifesto/manifesto
+VFDECRYPT=$(dirname $0)/../tools/vfdecrypt/vfdecrypt
+
+if [[ ! -f "$MANIFESTO" ]]; then
+    __error "Error: manifesto executable does not exist at $MANIFESTO"
+    __error "Did you compile it?"
+    exit 1
+fi
+
+if [[ ! -f "$VFDECRYPT" ]]; then
+    __error "Error: vfdecrypt executable does not exist at $VFDECRYPT"
+    __error "Did you compile it?"
+    exit 1
+fi
+
+if [[ $OSTYPE == linux* ]] && [[ -z $(which dmg2img) ]]; then
+    __error "Error: dmg2img executable not found"
+    __error "Is it available in PATH?"
+    exit 1
+fi
+
+FIRMWARE="$1"
+FIRMWARE_BASE=$(basename "$FIRMWARE" _Restore.ipsw)
+FIRMWARE_OUT=$IPSW_PATH/$FIRMWARE_BASE

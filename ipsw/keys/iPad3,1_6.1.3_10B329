@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FirmwareDownloadURL</key>
+	<string>http://appldnld.apple.com/iOS6.1/091-2576.20130319.JeX43/iPad3,1_6.1.3_10B329_Restore.ipsw</string>
+	<key>FirmwareKeysURL</key>
+	<string>https://api.ipsw.me/v4/keys/ipsw/iPad3,1/10B329</string>
+	<key>KernelCacheIV</key>
+	<string>6a1eccf85514313a25291fd5b325b1c3</string>
+	<key>KernelCacheKey</key>
+	<string>48810fe7500777b9a0cef71ca3ac1855204995326bc286dc3c913362d2e4332d</string>
+	<key>RootFSKey</key>
+	<string>855c0e3a4c625fcbde7e4ac74165c0b15644639a0c7d208f5abf12916872272d963f7de5</string>
+</dict>
+</plist>
